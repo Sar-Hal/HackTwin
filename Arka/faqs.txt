@@ -1,0 +1,43 @@
+# Hackathon FAQs
+
+## General Information
+
+Q: What is this hackathon about?
+A: This is a community hackathon focused on building innovative solutions using any technology stack of your choice. The event encourages collaboration, learning, and creative problem-solving.
+
+Q: How long is the hackathon?
+A: The hackathon runs for 48 hours, starting from the kick-off announcement.
+
+Q: Who can participate?
+A: Anyone with an interest in technology can participate. We welcome developers, designers, and innovators of all skill levels.
+
+## Teams and Registration
+
+Q: What's the team size limit?
+A: Teams can have 2-4 members. You can also participate solo, but we encourage team participation for better learning and networking.
+
+Q: Can I join without a team?
+A: Yes! Use the !match command to find team members with complementary skills.
+
+Q: How do I register my skills?
+A: Use the !register command followed by your skills (comma-separated). Example: !register python, javascript, react
+
+## Technical Requirements
+
+Q: What technologies can we use?
+A: You can use any programming language, framework, or tool. The only requirement is that your solution should be original work created during the hackathon.
+
+Q: Do we need to use specific APIs?
+A: No, you're free to use any APIs that help you build your solution. Just make sure to comply with their terms of service.
+
+## Judging and Prizes
+
+Q: What are the judging criteria?
+A: Projects will be judged on:
+- Innovation and Creativity (30%)
+- Technical Complexity (25%)
+- Practical Implementation (25%)
+- Presentation (20%)
+
+Q: Are there any prizes?
+A: Yes! We have exciting prizes for the top 3 teams. Details will be announced during the kick-off.
