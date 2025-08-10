@@ -90,9 +90,10 @@ class OutreachAgent:
         2. Introduction: Briefly introduce Hack-Nation and the hackathon's mission (experiment with AI, build bridges, launch ventures).
         3. Personalization: Highlight how their skills ({', '.join(user_data['keywords'])}) make them a great fit, and mention AI-powered team matchmaking.
         4. Call to Action: Encourage them to join with the registration link: https://hack-nation.ai/
-        5. Closing: Warm sign-off from the Hack-Nation team.
+        5. Community: Invite them to join our Discord community for networking and updates: https://discord.gg/cq7DPV67
+        6. Closing: Warm sign-off from the Hack-Nation team.
         
-        IMPORTANT: Include the registration link https://hack-nation.ai/ in the call to action section.
+        IMPORTANT: Include both the registration link https://hack-nation.ai/ and Discord invite https://discord.gg/cq7DPV67 in the email.
         Keep the email concise (under 150 words), engaging, and professional.
         """
         
@@ -112,6 +113,8 @@ Your expertise in {', '.join(user_data['keywords'])} makes you a perfect fit for
 Join us for an amazing experience with AI-powered team matchmaking to connect you with like-minded developers.
 
 Ready to hack the future? Register now at: https://hack-nation.ai/
+
+🚀 Join our Discord community for networking, updates, and team formation: https://discord.gg/cq7DPV67
 
 Best regards,
 The Hack-Nation Team"""
