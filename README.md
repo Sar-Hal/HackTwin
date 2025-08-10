@@ -167,18 +167,6 @@ cd Arka && python main.py
 
 ---
 
-## 🎨 Screenshots
-
-### 📧 Outreach Dashboard
-![Outreach Dashboard](https://via.placeholder.com/800x400/1e293b/white?text=Outreach+Dashboard)
-
-### 👥 Matchmaking Portal  
-![Matchmaking Portal](https://via.placeholder.com/800x400/059669/white?text=Matchmaking+Portal)
-
-### 🤖 Discord Bot Interface
-![Discord Bot](https://via.placeholder.com/800x400/5865f2/white?text=Discord+Bot+FAQ+System)
-
----
 
 ## 🔒 Security & Best Practices
 
