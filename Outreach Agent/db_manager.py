@@ -87,7 +87,7 @@ def main():
         print("\n🛠️  MongoDB User Management")
         print("=" * 40)
         print("1. View all users")
-        print("2. Reset user statuses")
+        print("2. Reset user statuses to Pending")
         print("3. Add new user")
         print("4. Delete all users")
         print("5. Export users to JSON")

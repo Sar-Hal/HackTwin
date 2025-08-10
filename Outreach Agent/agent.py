@@ -80,9 +80,10 @@ def generate_personalized_email(user_data):
     1. Greeting: Personalized and friendly, e.g., "Dear {user_data['name']},"
     2. Introduction: Briefly introduce Hack-Nation and the hackathon's mission (experiment with AI, build bridges, launch ventures).
     3. Personalization: Highlight how their skills ({', '.join(user_data['keywords'])}) make them a great fit, and mention AI-powered team matchmaking.
-    4. Call to Action: Encourage them to join, with an opt-in for matchmaking.
+    4. Call to Action: Encourage them to join with the registration link: https://hack-nation.ai/
     5. Closing: Warm sign-off from the Hack-Nation team.
     
+    IMPORTANT: Include the registration link https://hack-nation.ai/ in the call to action section.
     Keep the email concise (under 150 words), engaging, and professional.
     """
     
@@ -102,7 +103,7 @@ Your expertise in {', '.join(user_data['keywords'])} makes you a perfect fit for
 
 Join us for an amazing experience with AI-powered team matchmaking to connect you with like-minded developers.
 
-Ready to hack the future? Sign up now!
+Ready to hack the future? Register now at: https://hack-nation.ai/
 
 Best regards,
 The Hack-Nation Team"""
@@ -196,10 +197,10 @@ if __name__ == "__main__":
     
     # First run in test mode to see generated emails
     print("\n🧪 Testing email generation...")
-    run_outreach(test_mode=True)
-    
+    #run_outreach(test_mode=True)
+
     # Uncomment the line below to actually send emails (after configuring email credentials)
-    # run_outreach(test_mode=False)
+    run_outreach(test_mode=False)
     
     print("\n✨ Outreach campaign completed!")
     print("💡 To send actual emails:")
