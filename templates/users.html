@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Users - HackTwin{% endblock %}
+
+{% block heading %}Users Management{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-users"></i> All Users ({{ users|length }})
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if users %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Job Title</th>
+                                    <th>Skills</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Last Updated</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.name }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.job_title }}</td>
+                                    <td>
+                                        {% for skill in user.keywords %}
+                                            <span class="badge bg-secondary me-1">{{ skill }}</span>
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        {% if user.status == 'PENDING' %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% elif user.status == 'SENT' %}
+                                            <span class="badge bg-success">Sent</span>
+                                            {% if user.sent_at %}
+                                                <br><small class="text-muted">{{ user.sent_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                            {% endif %}
+                                        {% elif user.status == 'ERROR' %}
+                                            <span class="badge bg-danger">Error</span>
+                                            {% if user.error_message %}
+                                                <br><small class="text-danger">{{ user.error_message[:50] }}...</small>
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else 'N/A' }}</td>
+                                    <td>{{ user.sent_at.strftime('%Y-%m-%d %H:%M') if user.sent_at else 'N/A' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted">
+                        <i class="fas fa-user-plus fa-3x mb-3"></i>
+                        <p>No users found. <a href="{{ url_for('outreach') }}">Add some users</a> to get started.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

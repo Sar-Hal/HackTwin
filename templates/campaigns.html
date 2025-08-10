@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Campaigns - HackTwin{% endblock %}
+
+{% block heading %}Campaign History{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-line"></i> All Campaigns ({{ campaigns|length }})
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if campaigns %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Total Users</th>
+                                    <th>Sent</th>
+                                    <th>Failed</th>
+                                    <th>Success Rate</th>
+                                    <th>Mode</th>
+                                    <th>Status</th>
+                                    <th>Duration</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for campaign in campaigns %}
+                                <tr>
+                                    <td>{{ campaign.created_at.strftime('%Y-%m-%d %H:%M') if campaign.created_at else 'N/A' }}</td>
+                                    <td>{{ campaign.total_users or 0 }}</td>
+                                    <td><span class="badge bg-success">{{ campaign.sent or 0 }}</span></td>
+                                    <td><span class="badge bg-danger">{{ campaign.failed or 0 }}</span></td>
+                                    <td>
+                                        {% if campaign.total_users and campaign.total_users > 0 %}
+                                            {% set success_rate = ((campaign.sent or 0) / campaign.total_users * 100) | round(1) %}
+                                            <span class="badge bg-{{ 'success' if success_rate >= 90 else 'warning' if success_rate >= 70 else 'danger' }}">
+                                                {{ success_rate }}%
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if campaign.test_mode %}
+                                            <span class="badge bg-info">Test</span>
+                                        {% else %}
+                                            <span class="badge bg-primary">Live</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if campaign.status == 'COMPLETED' else 'warning' }}">
+                                            {{ campaign.status }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if campaign.created_at and campaign.completed_at %}
+                                            {% set duration = campaign.completed_at - campaign.created_at %}
+                                            {{ duration.total_seconds() | round(1) }}s
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted">
+                        <i class="fas fa-chart-line fa-3x mb-3"></i>
+                        <p>No campaigns yet. <a href="{{ url_for('outreach') }}">Start your first campaign</a></p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

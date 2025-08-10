@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block title %}Outreach Agent - HackTwin{% endblock %}
+
+{% block heading %}Outreach Agent{% endblock %}
+
+{% block toolbar %}
+<button type="button" class="btn btn-outline-primary" onclick="testCampaign()">
+    <i class="fas fa-flask"></i> Test Campaign
+</button>
+<button type="button" class="btn btn-primary" onclick="sendCampaign()">
+    <i class="fas fa-paper-plane"></i> Send Campaign
+</button>
+{% endblock %}
+
+{% block content %}
+<!-- Campaign Controls -->
+<div class="row mb-4">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-cogs"></i> Campaign Controls
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <button class="btn btn-outline-info btn-sm" onclick="testCampaign()">
+                        <i class="fas fa-flask"></i> Generate Test Emails
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" onclick="sendCampaign()">
+                        <i class="fas fa-paper-plane"></i> Send Live Campaign
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm" onclick="resetUsers()">
+                        <i class="fas fa-redo"></i> Reset User Status
+                    </button>
+                </div>
+                <div id="campaignStatus" class="alert" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-plus"></i> Add New User
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="addUserForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <input type="text" class="form-control form-control-sm" id="userName" placeholder="Name" required>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <input type="email" class="form-control form-control-sm" id="userEmail" placeholder="Email" required>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <input type="text" class="form-control form-control-sm" id="userJobTitle" placeholder="Job Title" required>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <input type="text" class="form-control form-control-sm" id="userSkills" placeholder="Skills (comma-separated)" required>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="fas fa-user-plus"></i> Add User
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Users List -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-users"></i> Target Users ({{ users|length }})
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if users %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Job Title</th>
+                                    <th>Skills</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.name }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.job_title }}</td>
+                                    <td>
+                                        {% for skill in user.keywords %}
+                                            <span class="badge bg-secondary me-1">{{ skill }}</span>
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        {% if user.status == 'PENDING' %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% elif user.status == 'SENT' %}
+                                            <span class="badge bg-success">Sent</span>
+                                        {% elif user.status == 'ERROR' %}
+                                            <span class="badge bg-danger">Error</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else 'N/A' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted">
+                        <i class="fas fa-user-plus fa-3x mb-3"></i>
+                        <p>No users found. Add some users to start your outreach campaign.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Campaign Results Modal -->
+<div class="modal fade" id="resultsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Campaign Results</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="resultsContent">
+                <!-- Results will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showStatus(message, type) {
+    const statusDiv = document.getElementById('campaignStatus');
+    statusDiv.className = `alert alert-${type}`;
+    statusDiv.innerHTML = message;
+    statusDiv.style.display = 'block';
+    
+    setTimeout(() => {
+        statusDiv.style.display = 'none';
+    }, 5000);
+}
+
+function testCampaign() {
+    showStatus('<i class="fas fa-spinner fa-spin"></i> Generating test emails...', 'info');
+    
+    fetch('/api/campaign/test', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showCampaignResults(data, 'Test Campaign Results');
+            showStatus(`✅ Generated ${data.sent} test emails`, 'success');
+        } else {
+            showStatus(`❌ Error: ${data.message}`, 'danger');
+        }
+    })
+    .catch(error => {
+        showStatus(`❌ Network error: ${error.message}`, 'danger');
+    });
+}
+
+function sendCampaign() {
+    if (!confirm('Are you sure you want to send the campaign? This will send real emails.')) {
+        return;
+    }
+    
+    showStatus('<i class="fas fa-spinner fa-spin"></i> Sending campaign...', 'info');
+    
+    fetch('/api/campaign/send', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showCampaignResults(data, 'Campaign Results');
+            showStatus(`✅ Campaign sent! ${data.sent} emails sent, ${data.failed} failed`, 'success');
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            showStatus(`❌ Error: ${data.message}`, 'danger');
+        }
+    })
+    .catch(error => {
+        showStatus(`❌ Network error: ${error.message}`, 'danger');
+    });
+}
+
+function resetUsers() {
+    if (!confirm('Are you sure you want to reset all user statuses to PENDING?')) {
+        return;
+    }
+    
+    fetch('/api/users/reset', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showStatus(`✅ Reset ${data.modified} user statuses`, 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showStatus(`❌ Error: ${data.message}`, 'danger');
+        }
+    })
+    .catch(error => {
+        showStatus(`❌ Network error: ${error.message}`, 'danger');
+    });
+}
+
+function showCampaignResults(data, title) {
+    document.querySelector('#resultsModal .modal-title').textContent = title;
+    
+    let html = `
+        <div class="mb-3">
+            <h6>Summary</h6>
+            <p><strong>Total Users:</strong> ${data.total_users}</p>
+            <p><strong>Successful:</strong> ${data.sent}</p>
+            <p><strong>Failed:</strong> ${data.failed}</p>
+        </div>
+        <div class="accordion" id="emailAccordion">
+    `;
+    
+    data.emails.forEach((email, index) => {
+        const statusClass = email.status === 'SENT' || email.status === 'GENERATED' ? 'success' : 'danger';
+        html += `
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading${index}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${index}">
+                        <span class="badge bg-${statusClass} me-2">${email.status}</span>
+                        ${email.name} (${email.email})
+                    </button>
+                </h2>
+                <div id="collapse${index}" class="accordion-collapse collapse" data-bs-parent="#emailAccordion">
+                    <div class="accordion-body">
+                        ${email.content ? `<pre style="white-space: pre-wrap; font-size: 0.9em;">${email.content}</pre>` : `<p class="text-danger">Error: ${email.error}</p>`}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    
+    document.getElementById('resultsContent').innerHTML = html;
+    new bootstrap.Modal(document.getElementById('resultsModal')).show();
+}
+
+// Add User Form
+document.getElementById('addUserForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const userData = {
+        name: document.getElementById('userName').value,
+        email: document.getElementById('userEmail').value,
+        job_title: document.getElementById('userJobTitle').value,
+        keywords: document.getElementById('userSkills').value.split(',').map(s => s.trim())
+    };
+    
+    fetch('/api/users/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showStatus('✅ User added successfully', 'success');
+            this.reset();
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showStatus(`❌ Error: ${data.message}`, 'danger');
+        }
+    })
+    .catch(error => {
+        showStatus(`❌ Network error: ${error.message}`, 'danger');
+    });
+});
+</script>
+{% endblock %}
