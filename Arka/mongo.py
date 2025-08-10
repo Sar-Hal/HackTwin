@@ -1,14 +1,12 @@
 from pymongo import MongoClient
-from config import Config
-from .models import Participant, Team
+from config import MONGODB_URI, DB_NAME
 
 class MongoDB:
-    def __init__(self, config):
-        self.client = MongoClient(config.MONGO_URI)
-        self.db = self.client[config.DATABASE_NAME]
-        self.participants = self.db.participants
+    def __init__(self):
+        self.client = MongoClient(MONGODB_URI)
+        self.db = self.client[DB_NAME]
+        self.users = self.db.users
         self.teams = self.db.teams
-        self.faq_embeddings = self.db.faq_embeddings
         
     async def save_participant(self, participant_data):
         return self.participants.update_one(

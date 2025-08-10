@@ -1,32 +1,40 @@
-from sentence_transformers import SentenceTransformer
-import numpy as np
-from transformers import pipeline
-from config import Config
-import torch
+import google.generativeai as genai
+from config import GEMINI_API_KEY
+import os
 
 class RAGSystem:
-    def __init__(self, config):
-        self.config = config
-        self.embedder = SentenceTransformer(config.EMBEDDING_MODEL)
-        self.llm = pipeline(
-            'text-generation',
-            model=config.LLM_MODEL,
-            device='cuda' if torch.cuda.is_available() else 'cpu'
-        )
-        self.qa_pairs = self._load_faqs()
-        self.embeddings = self._generate_embeddings()
-    
+    def __init__(self):
+        genai.configure(api_key=GEMINI_API_KEY)
+        self.model = genai.GenerativeModel('gemini-2.0-flash-exp')  # Updated to Gemini 2.0 Flash Experimental
+        self.faqs = self._load_faqs()
+
     def _load_faqs(self):
-        with open(self.config.FAQ_FILE, 'r') as f:
-            return [line.strip().split('|') for line in f if '|' in line]
-    
-    def _generate_embeddings(self):
-        return np.array([self.embedder.encode(q) for q, _ in self.qa_pairs])
-    
-    async def generate_answer(self, question):
-        query_embed = self.embedder.encode(question)
-        scores = np.dot(self.embeddings, query_embed)
-        best_idx = np.argmax(scores)
+        try:
+            faq_path = os.path.join(os.path.dirname(__file__), 'faqs.txt')
+            with open(faq_path, 'r', encoding='utf-8') as f:
+                return f.read()
+        except FileNotFoundError:
+            return "FAQ content not available."
+
+    async def get_answer(self, question):
+        prompt = f"""
+        Based on the following FAQ document, please answer the question. 
+        If the answer isn't directly in the FAQs, provide the most relevant information available.
+        If the question is completely unrelated to the hackathon, respond with "I can only answer questions about the Global AI Hackathon."
+
+        FAQ Document:
+        {self.faqs}
+
+        Question: {question}
+
+        Please provide a clear and concise answer based on the FAQ content.
+        """
+
+        try:
+            response = self.model.generate_content(prompt)
+            return response.text
+        except Exception as e:
+            return f"I apologize, but I encountered an error: {str(e)}"
         
         if scores[best_idx] < 0.5:  # confidence threshold
             return "I'm not sure about that. Please ask an organizer."
