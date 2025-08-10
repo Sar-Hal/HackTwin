@@ -4,9 +4,17 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
+    # Discord Bot Configuration
     DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
+    
+    # MongoDB Configuration
     MONGO_URI = os.getenv('MONGO_URI', 'mongodb+srv://Hacktwin:Rivu2004@cluster0.oadcf6k.mongodb.net/')
     DATABASE_NAME = 'hackathon_bot'
+    
+    # Gemini 2.0 Flash Experimental Configuration
+    GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+    
+    # Model Configuration
     EMBEDDING_MODEL = 'BAAI/bge-small-en-v1.5'
     LLM_MODEL = 'mistralai/Mistral-7B-Instruct-v0.1'
     FAQ_FILE = 'faqs.txt'

@@ -1,10 +1,10 @@
 from pymongo import MongoClient
-from config import MONGODB_URI, DB_NAME
+from config import Config
 
 class MongoDB:
     def __init__(self):
-        self.client = MongoClient(MONGODB_URI)
-        self.db = self.client[DB_NAME]
+        self.client = MongoClient(Config.MONGO_URI)
+        self.db = self.client[Config.DATABASE_NAME]
         self.users = self.db.users
         self.teams = self.db.teams
         

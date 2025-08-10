@@ -1,10 +1,10 @@
 import google.generativeai as genai
-from config import GEMINI_API_KEY
+from config import Config
 import os
 
 class RAGSystem:
     def __init__(self):
-        genai.configure(api_key=GEMINI_API_KEY)
+        genai.configure(api_key=Config.GEMINI_API_KEY)
         self.model = genai.GenerativeModel('gemini-2.0-flash-exp')  # Updated to Gemini 2.0 Flash Experimental
         self.faqs = self._load_faqs()
 
