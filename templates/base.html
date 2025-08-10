@@ -56,6 +56,11 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.endpoint == 'matchmaking_dashboard' }}" href="{{ url_for('matchmaking_dashboard') }}">
+                                <i class="fas fa-handshake"></i> Matchmaking
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link {{ 'active' if request.endpoint == 'users_page' }}" href="{{ url_for('users_page') }}">
                                 <i class="fas fa-users"></i> Users
                             </a>

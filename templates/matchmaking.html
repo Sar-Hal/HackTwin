@@ -1,0 +1,527 @@
+{% extends "base.html" %}
+
+{% block title %}Matchmaking - HackTwin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-6 mb-3">🤝 Teammate Matchmaking</h1>
+            <p class="lead text-muted">Upload resumes to extract skills and find perfect teammates for the hackathon</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ stats.total_users }}</h4>
+                            <p class="card-text">Total Users</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ stats.users_with_skills }}</h4>
+                            <p class="card-text">Users with Skills</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-cogs fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ stats.users_with_resumes }}</h4>
+                            <p class="card-text">Resumes Processed</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-file-upload fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ stats.total_matches }}</h4>
+                            <p class="card-text">Matches Found</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-handshake fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ "%.1f"|format(stats.avg_matches_per_user) }}</h4>
+                            <p class="card-text">Avg Matches/User</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-line fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">🚀 Quick Actions</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-success btn-lg w-100 mb-2" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                                <i class="fas fa-user-plus me-2"></i>Add User
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-primary btn-lg w-100 mb-2" data-bs-toggle="modal" data-bs-target="#uploadResumeModal">
+                                <i class="fas fa-upload me-2"></i>Upload Resume
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-warning btn-lg w-100 mb-2" onclick="runBulkMatching()">
+                                <i class="fas fa-magic me-2"></i>Run Bulk Matching
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">👥 Users & Matchmaking Status</h5>
+                    <button class="btn btn-outline-primary btn-sm" onclick="refreshUserData()">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Job Title</th>
+                                    <th>Skills</th>
+                                    <th>Resume Status</th>
+                                    <th>Matches Found</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ user.name }}</strong>
+                                    </td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.job_title }}</td>
+                                    <td>
+                                        {% if user.keywords %}
+                                            <div class="skills-container">
+                                                {% for skill in user.keywords[:3] %}
+                                                    <span class="badge bg-secondary me-1">{{ skill }}</span>
+                                                {% endfor %}
+                                                {% if user.keywords|length > 3 %}
+                                                    <span class="badge bg-light text-dark">+{{ user.keywords|length - 3 }} more</span>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted">No skills</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.resume_processed %}
+                                            <span class="badge bg-success">✓ Resume Processed</span>
+                                        {% elif user.keywords and user.keywords|length > 0 %}
+                                            <span class="badge bg-info">✓ Skills Added</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">⏳ No Skills</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ user.match_count }} matches</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <button type="button" class="btn btn-outline-primary" 
+                                                    onclick="uploadResumeForUser('{{ user._id }}', '{{ user.name }}')">
+                                                <i class="fas fa-upload"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-success" 
+                                                    onclick="findMatchesForUser('{{ user._id }}', '{{ user.name }}')">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-info" 
+                                                    onclick="viewUserMatches('{{ user._id }}', '{{ user.name }}')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">👤 Add New User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div class="mb-3">
+                        <label for="userName" class="form-label">Name *</label>
+                        <input type="text" class="form-control" id="userName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="userEmail" class="form-label">Email *</label>
+                        <input type="email" class="form-control" id="userEmail" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="userJobTitle" class="form-label">Job Title *</label>
+                        <input type="text" class="form-control" id="userJobTitle" name="job_title" 
+                               placeholder="e.g. Software Developer" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="userSkills" class="form-label">Skills (Optional)</label>
+                        <textarea class="form-control" id="userSkills" name="skills" rows="3" 
+                                  placeholder="Enter skills separated by commas (e.g. Python, React, MongoDB)"></textarea>
+                        <div class="form-text">You can add skills now or upload a resume later</div>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="autoMatchUser" name="auto_match" checked>
+                        <label class="form-check-label" for="autoMatchUser">
+                            Find matches automatically (if skills provided)
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="addUser()">
+                    <i class="fas fa-user-plus me-1"></i>Add User
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Resume Modal -->
+<div class="modal fade" id="uploadResumeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">📄 Upload Resume</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="resumeUploadForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="userSelect" class="form-label">Select User</label>
+                        <select class="form-select" id="userSelect" name="user_id" required>
+                            <option value="">Choose a user...</option>
+                            {% for user in users %}
+                            <option value="{{ user._id }}">{{ user.name }} ({{ user.email }})</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Resume will update/enhance their existing skills</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="resumeFile" class="form-label">Resume File</label>
+                        <input type="file" class="form-control" id="resumeFile" name="resume" 
+                               accept=".pdf,.docx,.txt" required>
+                        <div class="form-text">Supported formats: PDF, DOCX, TXT (Max: 16MB)</div>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="autoMatch" name="auto_match" checked>
+                        <label class="form-check-label" for="autoMatch">
+                            Automatically find matches after processing
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="uploadResume()">
+                    <i class="fas fa-upload me-1"></i>Upload & Process
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Matches Modal -->
+<div class="modal fade" id="userMatchesModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">🤝 Matches for <span id="matchedUserName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="matchesContent">
+                    <!-- Matches will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentUserId = null;
+
+function addUser() {
+    const form = document.getElementById('addUserForm');
+    const formData = new FormData(form);
+    
+    // Parse skills from textarea
+    const skillsText = formData.get('skills');
+    const skills = skillsText ? skillsText.split(',').map(s => s.trim()).filter(s => s) : [];
+    
+    const userData = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        job_title: formData.get('job_title'),
+        skills: skills,
+        auto_match: formData.get('auto_match') === 'on'
+    };
+    
+    const addBtn = event.target;
+    addBtn.disabled = true;
+    addBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Adding...';
+    
+    fetch('/matchmaking/add-user', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(userData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', `✅ User ${userData.name} added successfully! Added ${data.skills_count} skills.`);
+            if (data.matchmaking && data.matchmaking.success) {
+                showAlert('info', `🎉 Found ${data.matchmaking.matches_found} potential teammates! Notifications sent.`);
+            }
+            setTimeout(() => window.location.reload(), 2000);
+        } else {
+            showAlert('danger', `❌ Error: ${data.message}`);
+        }
+    })
+    .catch(error => {
+        showAlert('danger', `❌ Failed to add user: ${error.message}`);
+    })
+    .finally(() => {
+        addBtn.disabled = false;
+        addBtn.innerHTML = '<i class="fas fa-user-plus me-1"></i>Add User';
+        bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
+        form.reset();
+    });
+}
+
+function uploadResumeForUser(userId, userName) {
+    document.getElementById('userSelect').value = userId;
+    document.getElementById('userSelect').disabled = true;
+    new bootstrap.Modal(document.getElementById('uploadResumeModal')).show();
+}
+
+function uploadResume() {
+    const form = document.getElementById('resumeUploadForm');
+    const formData = new FormData(form);
+    
+    const uploadBtn = event.target;
+    uploadBtn.disabled = true;
+    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processing...';
+    
+    fetch('/matchmaking/upload-resume', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', `✅ Resume processed successfully! Extracted ${data.extracted_skills.length} skills.`);
+            if (data.matchmaking && data.matchmaking.success) {
+                showAlert('info', `🎉 Found ${data.matchmaking.matches_found} potential teammates! Notifications sent.`);
+            }
+            setTimeout(() => window.location.reload(), 2000);
+        } else {
+            showAlert('danger', `❌ Error: ${data.message}`);
+        }
+    })
+    .catch(error => {
+        showAlert('danger', `❌ Upload failed: ${error.message}`);
+    })
+    .finally(() => {
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = '<i class="fas fa-upload me-1"></i>Upload & Process';
+        bootstrap.Modal.getInstance(document.getElementById('uploadResumeModal')).hide();
+        document.getElementById('userSelect').disabled = false;
+        form.reset();
+    });
+}
+
+function findMatchesForUser(userId, userName) {
+    showAlert('info', `🔍 Finding matches for ${userName}...`);
+    
+    fetch('/matchmaking/find-matches', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            user_id: userId,
+            similarity_threshold: 0.1  // Lower threshold for better skill overlap matching
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', `✅ Found ${data.matches_found} matches for ${userName}! ${data.notifications_sent} notifications sent.`);
+            setTimeout(() => window.location.reload(), 2000);
+        } else {
+            showAlert('danger', `❌ Error: ${data.message}`);
+        }
+    })
+    .catch(error => {
+        showAlert('danger', `❌ Failed to find matches: ${error.message}`);
+    });
+}
+
+function viewUserMatches(userId, userName) {
+    document.getElementById('matchedUserName').textContent = userName;
+    currentUserId = userId;
+    
+    fetch(`/matchmaking/user-matches/${userId}`)
+    .then(response => response.json())
+    .then(data => {
+        const content = document.getElementById('matchesContent');
+        
+        if (data.success && data.matches.length > 0) {
+            let html = '<div class="row">';
+            data.matches.forEach(match => {
+                html += `
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">${match.other_user.name}</h6>
+                                <p class="card-text">
+                                    <strong>Job:</strong> ${match.other_user.job_title}<br>
+                                    <strong>Email:</strong> ${match.other_user.email}<br>
+                                    <strong>Similarity:</strong> ${(match.similarity_score * 100).toFixed(1)}%<br>
+                                    <strong>Match Date:</strong> ${new Date(match.match_date).toLocaleDateString()}
+                                </p>
+                                <div class="mb-2">
+                                    <strong>Common Skills:</strong><br>
+                                    ${match.common_skills.map(skill => `<span class="badge bg-secondary me-1">${skill}</span>`).join('')}
+                                </div>
+                                ${match.notifications_sent ? '<span class="badge bg-success">✓ Notified</span>' : '<span class="badge bg-warning">⏳ Pending</span>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            content.innerHTML = html;
+        } else {
+            content.innerHTML = '<div class="alert alert-info">No matches found yet. Upload a resume and run matching to find teammates!</div>';
+        }
+        
+        new bootstrap.Modal(document.getElementById('userMatchesModal')).show();
+    })
+    .catch(error => {
+        showAlert('danger', `❌ Failed to load matches: ${error.message}`);
+    });
+}
+
+function runBulkMatching() {
+    if (!confirm('This will run matchmaking for all users with processed resumes. Continue?')) {
+        return;
+    }
+    
+    showAlert('info', '🚀 Running bulk matchmaking...');
+    
+    fetch('/matchmaking/bulk-match', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'}
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', `✅ Bulk matching completed! Processed ${data.processed_users} users, found ${data.total_matches} matches, sent ${data.total_notifications} notifications.`);
+            setTimeout(() => window.location.reload(), 3000);
+        } else {
+            showAlert('danger', `❌ Error: ${data.message}`);
+        }
+    })
+    .catch(error => {
+        showAlert('danger', `❌ Bulk matching failed: ${error.message}`);
+    });
+}
+
+function refreshUserData() {
+    window.location.reload();
+}
+
+function showAlert(type, message) {
+    const alertContainer = document.createElement('div');
+    alertContainer.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    alertContainer.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 400px;';
+    alertContainer.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertContainer);
+    
+    setTimeout(() => alertContainer.remove(), 5000);
+}
+
+// Reset modal when closed
+document.getElementById('uploadResumeModal').addEventListener('hidden.bs.modal', function () {
+    document.getElementById('userSelect').disabled = false;
+    document.getElementById('resumeUploadForm').reset();
+});
+</script>
+{% endblock %}

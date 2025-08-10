@@ -1,11 +1,15 @@
 import google.generativeai as genai
 from config import Config
 import os
+import sys
+
+# Import the API manager
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from gemini_api_manager import api_manager
 
 class RAGSystem:
     def __init__(self):
-        genai.configure(api_key=Config.GEMINI_API_KEY)
-        self.model = genai.GenerativeModel('gemini-2.0-flash-exp')  # Updated to Gemini 2.0 Flash Experimental
+        # No need to configure genai here - API manager handles it
         self.faqs = self._load_faqs()
 
     def _load_faqs(self):
@@ -31,7 +35,9 @@ class RAGSystem:
         """
 
         try:
-            response = self.model.generate_content(prompt)
+            # Use the API manager to get a configured model with rotated key
+            model = api_manager.get_configured_model('gemini-2.0-flash-exp')
+            response = model.generate_content(prompt)
             return response.text
         except Exception as e:
             return f"I apologize, but I encountered an error: {str(e)}"

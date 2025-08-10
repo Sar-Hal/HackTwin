@@ -1,2 +1,58 @@
+# Environment variables (NEVER COMMIT THESE!)
 .env
+.env.*
 Arka\.env
+Arka/.env
+
+# API Keys and Secrets
+*.key
+*.pem
+secrets/
+config/secrets.json
+
+# Database credentials
+database.json
+db_config.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Node modules (if any)
+node_modules/
+npm-debug.log*
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+
+# Personal notes
+NOTES.md
+TODO.md
+personal/

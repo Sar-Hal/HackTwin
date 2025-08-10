@@ -5,6 +5,7 @@ Main Flask application with Outreach Agent functionality
 
 from flask import Flask, render_template, request, jsonify, flash, redirect, url_for
 import os
+import sys
 import smtplib
 from email.mime.text import MIMEText
 from pymongo import MongoClient
@@ -14,15 +15,26 @@ from datetime import datetime
 import threading
 import time
 
+# Add the current directory to Python path for imports
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+# Import matchmaking functionality
+try:
+    from matchmaking_users.routes import setup_matchmaking_routes
+    MATCHMAKING_AVAILABLE = True
+except ImportError as e:
+    print(f"⚠️  Matchmaking feature not available: {e}")
+    MATCHMAKING_AVAILABLE = False
+
 # Load environment variables
 load_dotenv()
+
+# Import the API manager
+from gemini_api_manager import api_manager
 
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'your-secret-key-here')
-
-# Configure Gemini AI
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 # MongoDB connection
 try:
@@ -33,6 +45,14 @@ try:
     print("✅ Successfully connected to MongoDB")
 except Exception as e:
     print(f"❌ Error connecting to MongoDB: {e}")
+
+# Setup Matchmaking Routes
+if MATCHMAKING_AVAILABLE:
+    try:
+        setup_matchmaking_routes(app, users_collection)
+        print("✅ Matchmaking routes initialized successfully")
+    except Exception as e:
+        print(f"⚠️  Error setting up matchmaking routes: {e}")
 
 # SMTP setup
 smtp_server = "smtp.gmail.com"
@@ -98,11 +118,21 @@ class OutreachAgent:
         """
         
         try:
-            model = genai.GenerativeModel("gemini-2.0-flash-exp")
+            # Enhanced rate limiting with distributed API keys
+            print(f"🤖 Generating email for {user_data['name']}...")
+            print("⏳ Applying rate limiting with key rotation (5 seconds)...")
+            time.sleep(5)  # Reduced delay since we have multiple keys
+            
+            # Use the API manager to get a configured model with rotated key
+            model = api_manager.get_configured_model("gemini-2.0-flash-exp")
             response = model.generate_content(prompt)
+            
+            print(f"✅ Email generated successfully for {user_data['name']}")
             return response.text
         except Exception as e:
             print(f"❌ Error generating email content for {user_data['name']}: {e}")
+            print(f"⚠️  Using fallback template instead...")
+            
             # Return fallback template
             return f"""Dear {user_data['name']},
 
