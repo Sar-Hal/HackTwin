@@ -1,6 +1,6 @@
 # 🚀 HackTwin - AI-Powered Hackathon Management Platform
 
-> **Zapping hackathons into high gear!** CodeZap powers Hack-Nation with AI-driven outreach, intelligent Discord bots, and resume-powered team matchmaking.
+> **Zapping hackathons into high gear!** HackTwin powers Hack-Nation with AI-driven outreach, intelligent Discord bots, and resume-powered team matchmaking.
 
 [![GitHub Repo](https://img.shields.io/badge/GitHub-HackTwin-blue?style=for-the-badge&logo=github)](https://github.com/Sar-Hal/HackTwin)
 [![Python](https://img.shields.io/badge/Python-3.11+-green?style=for-the-badge&logo=python)](https://python.org)
